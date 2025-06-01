@@ -1,6 +1,8 @@
 ---
 title: "R Utility Functions"
-output: html_notebook
+output:
+  html_document:
+    df_print: paged
 ---
 
 # In-built mtcars dataset will be used for visualization dataset. (a glimpse of the dataset)
@@ -24,6 +26,7 @@ summary_df = as.data.frame(summary(mtcars))
 ### categorical variables
 
 ```{r}
+library(ggplot2)
 source("../R/ggplot2_utils/colors_utils.R")
 
 # order the categorical variables
@@ -65,6 +68,7 @@ preview_colors(colors)
 
 
 ```{r}
+library(ggplot2)
 source("../R/ggplot2_utils/colors_utils.R")
 
 # order the categorical variables
@@ -93,6 +97,7 @@ ggplot(mtcars, aes(x = mpg, y = wt, color = factor(brand))) +
 ### continous variables
 
 ```{r}
+library(ggplot2)
 source("../R/ggplot2_utils/colors_utils.R")
 
 show_continuous_palettes("publication")
