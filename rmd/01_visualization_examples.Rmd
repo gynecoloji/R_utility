@@ -1,0 +1,110 @@
+---
+title: "R Utility Functions"
+output: html_notebook
+---
+
+# In-built mtcars dataset will be used for visualization dataset. (a glimpse of the dataset)
+
+```{r}
+library(knitr)
+data("mtcars")
+kable(mtcars, caption = "Preview of the dataset")
+summary_df = as.data.frame(summary(mtcars))
+
+```
+
+# Selection of colors for categorical and continous variables
+ - categorical variables
+    - general use
+    - advanced use
+ - continuous variables
+    - general use
+    - advanced use
+    
+### categorical variables
+
+```{r}
+source("../R/ggplot2_utils/colors_utils.R")
+
+# order the categorical variables
+mtcars$cyl = factor(mtcars$cyl, levels = c(4,6,8))
+n_cyl = length(levels(mtcars$cyl))
+
+# selection of colors based on different parameters
+colors = get_categorical_colors(n = n_cyl,
+                                method = 'auto',
+                                colorblind_safe = TRUE)
+names(colors) = levels(mtcars$cyl)
+preview_colors(colors, labels = names(colors))
+ggplot(mtcars, aes(x = mpg, y = wt, color = factor(cyl))) +
+    geom_point(size = 3) +
+    scale_color_manual(values = colors) +
+    theme_minimal()
+
+
+colors = get_categorical_colors(n = n_cyl,
+                                method = 'brewer',
+                                palette = 'Dark2')
+names(colors) = levels(mtcars$cyl)
+preview_colors(colors, labels = names(colors))
+ggplot(mtcars, aes(x = mpg, y = wt, color = factor(cyl))) +
+    geom_point(size = 3) +
+    scale_color_manual(values = colors) +
+    theme_minimal()
+
+
+
+colors = get_categorical_colors(n = 20,
+                                method = 'auto')
+preview_colors(colors)
+
+
+
+```
+
+
+
+```{r}
+source("../R/ggplot2_utils/colors_utils.R")
+
+# order the categorical variables
+mtcars$brand = rownames(mtcars)
+mtcars$brand = factor(mtcars$brand)
+n_brand = length(levels(mtcars$brand))
+
+# selection of colors based on different parameters
+colors = get_publication_colors(n = n_brand,
+                                shuffle = TRUE)
+names(colors) = levels(mtcars$brand)
+preview_colors(colors, labels = names(colors))
+ggplot(mtcars, aes(x = mpg, y = wt, color = factor(brand))) +
+    geom_point(size = 3) +
+    scale_color_manual(values = colors) +
+    theme_minimal()
+
+ggplot(mtcars, aes(x = mpg, y = wt, color = factor(brand))) +
+    geom_point(size = 3) +
+    scale_color_publication() +
+    theme_minimal() +
+    labs(title = "Publication-Quality Colors")
+
+```
+
+### continous variables
+
+```{r}
+source("../R/ggplot2_utils/colors_utils.R")
+
+show_continuous_palettes("publication")
+colors = get_continuous_colors(method = "publication", palette = "nature_heatmap")
+
+preview_continuous_colors(colors, values = seq(-1, 1, length.out = 100), 
+                          title = "Diverging Scale")
+```
+
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
