@@ -1628,6 +1628,7 @@ display: none;
 <h1>In-built mtcars dataset will be used for visualization dataset. (a
 glimpse of the dataset)</h1>
 <pre class="r"><code>library(knitr)
+library(ggplot2)
 data(&quot;mtcars&quot;)
 kable(mtcars, caption = &quot;Preview of the dataset&quot;)</code></pre>
 <table style="width:100%;">
@@ -2131,8 +2132,7 @@ kable(mtcars, caption = &quot;Preview of the dataset&quot;)</code></pre>
 </ul>
 <div id="categorical-variables" class="section level3">
 <h3>categorical variables</h3>
-<pre class="r"><code>library(ggplot2)
-source(&quot;../R/ggplot2_utils/colors_utils.R&quot;)
+<pre class="r"><code>source(&quot;../R/ggplot2_utils/colors_utils.R&quot;)
 
 # order the categorical variables
 mtcars$cyl = factor(mtcars$cyl, levels = c(4,6,8))
@@ -2194,8 +2194,7 @@ preview_colors(colors)</code></pre>
 ## Color 18: #9849D9
 ## Color 19: #E044C2
 ## Color 20: #C66241</code></pre>
-<pre class="r"><code>library(ggplot2)
-source(&quot;../R/ggplot2_utils/colors_utils.R&quot;)
+<pre class="r"><code>source(&quot;../R/ggplot2_utils/colors_utils.R&quot;)
 
 # order the categorical variables
 mtcars$brand = rownames(mtcars)
@@ -2255,8 +2254,7 @@ preview_colors(colors, labels = names(colors))</code></pre>
 </div>
 <div id="continous-variables" class="section level3">
 <h3>continous variables</h3>
-<pre class="r"><code>library(ggplot2)
-source(&quot;../R/ggplot2_utils/colors_utils.R&quot;)
+<pre class="r"><code>source(&quot;../R/ggplot2_utils/colors_utils.R&quot;)
 
 show_continuous_palettes(&quot;publication&quot;)</code></pre>
 <pre><code>## PUBLICATION palettes:
