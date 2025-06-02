@@ -498,7 +498,7 @@ complex_boxplot <- function(data,
   }
   
   # Add statistical comparisons using ggpubr
-  if (add_statistics && stat_available) {
+  if (add_statistics) {
     # Ensure x_var is factor for proper grouping
     data[[x_var]] <- as.factor(data[[x_var]])
     
@@ -549,7 +549,7 @@ complex_boxplot <- function(data,
     } else {
       warning("Need at least 2 groups for statistical comparisons.")
     }
-  } else if (add_statistics && !stat_available) {
+  } else if (add_statistics) {
     warning("ggpubr package is required for statistical comparisons. Install with: install.packages('ggpubr')")
   }
   
