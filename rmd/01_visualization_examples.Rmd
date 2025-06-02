@@ -104,3 +104,97 @@ colors = get_continuous_colors(method = "publication", palette = "nature_heatmap
 preview_continuous_colors(colors, values = seq(-1, 1, length.out = 100), 
                           title = "Diverging Scale")
 ```
+
+# boxplot
+```{r}
+source('../R/ggplot2_utils/Boxplot.R')
+# order the categorical variables
+mtcars$cyl = factor(mtcars$cyl, levels = c(4,6,8))
+n_cyl = length(levels(mtcars$cyl))
+
+# selection of colors based on different parameters
+colors = get_categorical_colors(n = n_cyl,
+                                method = 'auto',
+                                colorblind_safe = TRUE)
+names(colors) = levels(mtcars$cyl)
+
+create_boxplot(mtcars, x_var = "cyl", y_var = "mpg", 
+               title = "MPG by Number of Cylinders",
+               fill_var = "cyl")+
+  boxplot_theme()+scale_fill_manual(values = colors)
+
+complex_boxplot(data=mtcars,
+                            x_var='cyl',
+                            y_var='mpg',
+                            fill_var = 'cyl',
+                            facet_var = NULL,
+                            facet_type = "wrap",
+                            add_violin = FALSE,
+                            add_points = TRUE,
+                            point_style = "jitter",
+                            add_mean = FALSE,
+                            error_type = "se",
+                            notched = FALSE,
+                            add_n_labels = TRUE,
+                            add_statistics = TRUE,
+                            stat_method = "t.test",
+                            stat_comparisons = NULL,
+                            title = "MPG by Number of Cylinders",
+                            subtitle = NULL,
+                            x_label = NULL,
+                            y_label = NULL,
+                            color_palette = "Set2",
+                            alpha_level = 0.7,
+                            base_size = 12,
+                            legend_position = "right",
+                            coord_flip = FALSE,
+                            y_limits = NULL,
+                            custom_theme = boxplot_theme())+scale_fill_manual(values = colors)
+  
+
+
+
+
+```
+
+# scatterplot
+
+```{r}
+source("../R/ggplot2_utils/Scatterplot.R")
+
+simple_scatterplot_categorical(data=mtcars,
+                    x_var='mpg',
+                    y_var='wt',
+                    color_var = 'cyl',
+                    add_smooth = TRUE,
+                    smooth_method = "lm",
+                    smooth_se=TRUE,
+                    add_correlation = TRUE,
+                    smooth_se_group = FALSE,
+                    point_alpha = 0.6,
+                    point_size = 2.5,
+                   custom_theme = scatterplot_theme())+scale_color_manual(values = colors)
+
+simple_scatterplot_continuous(data=mtcars,
+                    x_var='mpg',
+                    y_var='wt',
+                    color_var = 'mpg',
+                                size_var = 'wt',
+                                add_smooth = TRUE,
+                                smooth_method = "lm",
+                                color_palette = 'viridis',
+                                title = "",
+                                point_size = 3.5,
+                                point_alpha = 0.7,
+                    custom_theme = scatterplot_themea_with_legend_title())
+
+
+```
+
+
+
+
+
+
+
+
