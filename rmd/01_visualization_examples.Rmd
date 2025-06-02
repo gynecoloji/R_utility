@@ -12,7 +12,6 @@ library(knitr)
 library(ggplot2)
 data("mtcars")
 kable(mtcars, caption = "Preview of the dataset")
-summary_df = as.data.frame(summary(mtcars))
 
 ```
 
@@ -22,7 +21,6 @@ summary_df = as.data.frame(summary(mtcars))
     - advanced use
  - continuous variables
     - general use
-    - advanced use
     
 ### categorical variables
 
@@ -91,6 +89,8 @@ ggplot(mtcars, aes(x = mpg, y = wt, color = factor(brand))) +
     theme_minimal() +
     labs(title = "Publication-Quality Colors")
 
+
+
 ```
 
 ### continous variables
@@ -104,10 +104,3 @@ colors = get_continuous_colors(method = "publication", palette = "nature_heatmap
 preview_continuous_colors(colors, values = seq(-1, 1, length.out = 100), 
                           title = "Diverging Scale")
 ```
-
-
-Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
-
-When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
-
-The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.

@@ -396,6 +396,7 @@ show_publication_palette <- function(ncol = 6) {
 
 ## continous variable ---------
 
+### Selection of colors for variables -- general use ----------
 #' Generate color palettes for continuous variables
 #'
 #' @param n Number of color steps/breaks (default: 100 for smooth gradients)
@@ -772,7 +773,5 @@ if (FALSE) {
     scale_fill_continuous_custom(method = "custom", colors = custom_colors) +
     theme_minimal()
 }
-
-
 
 
