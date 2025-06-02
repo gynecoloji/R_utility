@@ -1,3 +1,23 @@
+# Required packages
+library(ggplot2)
+
+# Optional packages (with conditional loading)
+if (!requireNamespace("RColorBrewer", quietly = TRUE)) {
+  message("RColorBrewer package not installed. ColorBrewer palettes will not be available.")
+  message("Install with: install.packages('RColorBrewer')")
+}
+
+if (!requireNamespace("viridis", quietly = TRUE)) {
+  message("viridis package not installed. Viridis color palettes will not be available.")
+  message("Install with: install.packages('viridis')")
+}
+
+if (!requireNamespace("randomcoloR", quietly = TRUE)) {
+  message("randomcoloR package not installed. Random distinctive color generation will use fallback method.")
+  message("Install with: install.packages('randomcoloR')")
+}
+
+
 # Functions for choosing color----
 
 ## categorical variables --------

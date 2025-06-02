@@ -1,3 +1,24 @@
+# Required packages
+library(ggplot2)
+library(dplyr)
+
+# Optional packages (with conditional loading)
+if (!requireNamespace("ggbeeswarm", quietly = TRUE)) {
+  message("ggbeeswarm package not installed. Beeswarm point style will not be available.")
+  message("Install with: install.packages('ggbeeswarm')")
+}
+
+if (!requireNamespace("ggforce", quietly = TRUE)) {
+  message("ggforce package not installed. Sina point style will not be available.")
+  message("Install with: install.packages('ggforce')")
+}
+
+if (!requireNamespace("ggpubr", quietly = TRUE)) {
+  message("ggpubr package not installed. Statistical comparisons will not be available.")
+  message("Install with: install.packages('ggpubr')")
+}
+
+
 #' Create Customizable Boxplots with ggplot2
 #'
 #' This function generates boxplots using ggplot2 with extensive customization options.

@@ -1,3 +1,12 @@
+required_packages <- c("ggplot2", "dplyr")
+
+for (pkg in required_packages) {
+  if (!require(pkg, character.only = TRUE)) {
+    install.packages(pkg)
+    library(pkg, character.only = TRUE)
+  }
+}
+
 #' Create Simple Scatterplots with ggplot2
 #'
 #' This function generates clean, customizable scatterplots using ggplot2.
@@ -147,7 +156,7 @@ simple_scatterplot_categorical <- function(data,
   if (is.null(size_var)) {
     p <- p + geom_point(alpha = point_alpha, size = point_size)
   } else {
-    p <- p + geom_point(alpha = point_alpha)
+    p <- p + geom_point(alpha = point_alpha, aes(size_var))
   }
   
   # Add smooth line if requested

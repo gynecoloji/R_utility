@@ -192,8 +192,68 @@ simple_scatterplot_continuous(data=mtcars,
 ```
 
 
+### special case for scatterplot -- UMAP
+
+```{r}
+source("../R/ggplot2_utils/UMAP_scatterplot.R")
+
+# initiate a toy data
+df = data.frame(umap_1 = rnorm(3000, mean=2, sd=1), umap_2 = rnorm(3000, mean=1, sd=1),
+                group = paste('CC', sample(0:9,3000, replace=TRUE)),
+                feature = rnorm(3000, mean=10, sd=20))
+df$feature = df$feature - min(df$feature)
+
+x_min <- min(df$umap_1)
+y_min <- min(df$umap_2)
+x_max <- max(df$umap_1)
+y_max <- max(df$umap_2)
+
+# plot with distinctive colors
+plot = ggplot(data = df, aes(x = umap_1, y=umap_2, color=group))+
+  geom_point()+
+  umap_theme_without_texts()
+
+add_umap_arrows(plot, x_min, x_max, y_min, y_max)
+
+# plot with default gradient colors
+plot = ggplot(data = df, aes(x = umap_1, y=umap_2, color=feature))+
+  geom_point()+
+  umap_theme_without_texts()
+
+add_umap_arrows(plot, x_min, x_max, y_min, y_max)
+
+# plot with customized gradient colors
+source("../R/ggplot2_utils/colors_utils.R")
+upper = 100
+lower = 0
+median = (upper+lower)/2
+
+plot = ggplot(data = df, 
+           aes(x = umap_1, y=umap_2, 
+               color = feature)
+)+
+  geom_point(alpha = .8, size=3)+
+  scale_color_continuous_custom(method = "publication", 
+                               palette = "climate",
+                               limits = c(lower,upper),
+                               breaks = seq(lower,upper,median),
+                               oob = function(x, ...){scales::squish(x, c(lower,upper))})+
+  umap_theme_without_texts()
+
+add_umap_arrows(plot, x_min, x_max, y_min, y_max)
+
+```
 
 
+# barplot
+
+```{r}
+source("../R/ggplot2_utils/Ridge_Barplot.R")
+create_barplot(mtcars, x_var = "cyl", title = "Count by Cylinder", reorder_bars = TRUE)
+
+
+
+```
 
 
 
