@@ -296,15 +296,7 @@ process_seurat_batch_correction <- function(
   if (!"percent.rb" %in% colnames(seurat_obj@meta.data)) {
     seurat_obj[["percent.rb"]] <- PercentageFeatureSet(seurat_obj, pattern = "^RP[SL]")
   }
-  
-  # Quality control filtering (adjust thresholds as needed)
-  seurat_obj <- subset(seurat_obj, 
-                       subset = nFeature_RNA > 200 & 
-                         nFeature_RNA < 5000 & 
-                         percent.mt < 20)
-  
   if (verbose) cat("Step 2: Normalization and feature selection\n")
-  
   # Method-specific processing
   if (method == "SCTransform") {
     # SCTransform handles normalization, scaling, and feature selection
@@ -317,8 +309,7 @@ process_seurat_batch_correction <- function(
     seurat_obj <- FindVariableFeatures(seurat_obj, 
                                        selection.method = "vst",
                                        nfeatures = 2000,
-                                       verbose = verbose)
-    
+                                       verbose = verbose) 
     # Scale data
     all_genes <- rownames(seurat_obj)
     vars_regress <- c("percent.mt", vars_to_regress)
@@ -327,24 +318,19 @@ process_seurat_batch_correction <- function(
                             vars.to.regress = vars_regress,
                             verbose = verbose)
   }
-  
   if (verbose) cat("Step 3: Dimensionality reduction\n")
-  
   # PCA
   seurat_obj <- RunPCA(seurat_obj, 
                        features = VariableFeatures(object = seurat_obj),
                        verbose = verbose)
-  
   # Apply batch correction method
   if (verbose) cat(paste("Step 4: Applying", method, "batch correction\n"))
-  
   if (method == "harmony") {
     # Harmony integration
     if (!requireNamespace("harmony", quietly = TRUE)) {
       stop("harmony package is required for this method. Install with: install.packages('harmony')")
     }
-    library(harmony)
-    
+    library(harmony) 
     seurat_obj <- RunHarmony(seurat_obj, 
                              group.by.vars = batch_var,
                              dims.use = 1:dims,
