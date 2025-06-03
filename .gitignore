@@ -3,3 +3,4 @@ test_*/
 
 # files
 tmp*
+.Rhistory
