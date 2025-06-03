@@ -1,33 +1,49 @@
+
+# Function to check, install, and load packages
+check_and_load_packages <- function(packages) {
+  for (pkg in packages) {
+    if (!require(pkg, character.only = TRUE, quietly = TRUE)) {
+      cat("Installing package:", pkg, "\n")
+      install.packages(pkg, dependencies = TRUE)
+      library(pkg, character.only = TRUE)
+    }
+  }
+}
+
+# List of required packages
+required_packages <- c(
+  "Seurat",
+  "harmony",
+  "batchelor",
+  "dplyr",
+  "stringr",
+  "pheatmap",
+  "RColorBrewer",
+  "ggplot2",
+  "ggrepel",
+  "SingleR",
+  "patchwork",
+  "grid",
+  "gridExtra",
+  "pals",
+  "harmony",
+  "future",
+  "msigdbr",
+  "tidyr"
+)
+
 suppressPackageStartupMessages({
-  library(Seurat)
-  library(dplyr)
-  library(stringr)
-  library(pheatmap)
-  library(RColorBrewer)
-  library(ggplot2)
-  library(ggrepel)
-  library(SingleR)
-  library(patchwork)
-  library(grid)
-  library(gridExtra)
-  library(pals)
-  library(harmony)
-  library(future)
-  library(msigdbr)
-  library(tidyr)
+  check_and_load_packages(required_packages)
 })
 
 #' Quality Control Visualization
-#' 
 #' @param seurat_obj Seurat object
 #' @param sample_name Name of the sample for plot titles
 #' @param output_dir Directory to save plots
-#' 
 #' @return The Seurat object with QC metrics added
 plot_qc_metrics <- function(seurat_obj, sample_name, output_dir) {
   # Create output directory if it doesn't exist
   dir.create(file.path(output_dir, sample_name), showWarnings = FALSE, recursive = TRUE)
-  
   # Add QC metrics
   seurat_obj$log10GenesPerUMI <- log10(seurat_obj$nFeature_RNA)/log10(seurat_obj$nCount_RNA)
   seurat_obj$mitoRatio <- PercentageFeatureSet(object = seurat_obj, pattern = "^MT-")
@@ -93,11 +109,9 @@ plot_qc_metrics <- function(seurat_obj, sample_name, output_dir) {
 
 
 #' Filter cells and genes based on QC metrics
-#' 
 #' @param seurat_obj Seurat object with QC metrics
 #' @param sample_name Name of the sample
 #' @param output_dir Directory to save plots
-#' 
 #' @return Filtered Seurat object
 filter_cells_and_genes <- function(seurat_obj, sample_name, output_dir) {
   # Cell-level filtering
@@ -212,31 +226,277 @@ process_seurat <- function(seurat_object, npca=50, ndim=50, resolution=0.5,
 
 
 
+#' Process Seurat Object with Batch Correction
+#' 
+#' This function performs comprehensive batch correction on a Seurat object
+#' using various methods available in the Seurat package
+#' 
+#' @param seurat_obj Seurat object containing single-cell data
+#' @param batch_var Character string specifying the batch variable column name in metadata
+#' @param method Character string specifying batch correction method:
+#'   "harmony" (default), "CCA", "RPCA", "SCTransform (not integration method)", or "fastMNN"
+#' @param dims Integer specifying number of dimensions to use (default: 30)
+#' @param resolution Numeric value for clustering resolution (default: 0.5)
+#' @param vars_to_regress Character vector of variables to regress out during scaling
+#' @param verbose Logical indicating whether to print progress messages
+#' @param return_uncorrected Logical indicating whether to return uncorrected object for comparison
+#' 
+#' @return Processed Seurat object with batch correction applied
+#' 
+#' @examples
+#' # Basic usage with Harmony
+#' corrected_obj <- process_seurat_batch_correction(seurat_obj, batch_var = "orig.ident")
+#' 
+#' # Using CCA integration
+#' corrected_obj <- process_seurat_batch_correction(
+#'   seurat_obj, 
+#'   batch_var = "batch", 
+#'   method = "CCA",
+#'   dims = 20
+#' )
 
+process_seurat_batch_correction <- function(
+    seurat_obj,
+    batch_var,
+    method = "harmony",
+    dims = 30,
+    resolution = 0.5,
+    vars_to_regress = NULL,
+    verbose = TRUE,
+    return_uncorrected = FALSE
+) {
+  
+  # Validate inputs
+  if (!inherits(seurat_obj, "Seurat")) {
+    stop("Input must be a Seurat object")
+  }
+  
+  if (!batch_var %in% colnames(seurat_obj@meta.data)) {
+    stop(paste("Batch variable", batch_var, "not found in metadata"))
+  }
+  
+  method <- match.arg(method, c("harmony", "CCA", "RPCA", "SCTransform", "fastMNN"))
+  
+  if (verbose) cat("Starting batch correction pipeline...\n")
+  
+  # Store original object if requested
+  if (return_uncorrected) {
+    seurat_uncorrected <- seurat_obj
+  }
+  
+  # Basic preprocessing steps
+  if (verbose) cat("Step 1: Basic preprocessing\n")
+  
+  # Calculate mitochondrial gene percentage if not present
+  if (!"percent.mt" %in% colnames(seurat_obj@meta.data)) {
+    seurat_obj[["percent.mt"]] <- PercentageFeatureSet(seurat_obj, pattern = "^MT-")
+  }
+  
+  # Calculate ribosomal gene percentage
+  if (!"percent.rb" %in% colnames(seurat_obj@meta.data)) {
+    seurat_obj[["percent.rb"]] <- PercentageFeatureSet(seurat_obj, pattern = "^RP[SL]")
+  }
+  
+  # Quality control filtering (adjust thresholds as needed)
+  seurat_obj <- subset(seurat_obj, 
+                       subset = nFeature_RNA > 200 & 
+                         nFeature_RNA < 5000 & 
+                         percent.mt < 20)
+  
+  if (verbose) cat("Step 2: Normalization and feature selection\n")
+  
+  # Method-specific processing
+  if (method == "SCTransform") {
+    # SCTransform handles normalization, scaling, and feature selection
+    seurat_obj <- SCTransform(seurat_obj, 
+                              vars.to.regress = c("percent.mt", vars_to_regress),
+                              verbose = verbose)
+  } else {
+    # Standard normalization for other methods
+    seurat_obj <- NormalizeData(seurat_obj, verbose = verbose)
+    seurat_obj <- FindVariableFeatures(seurat_obj, 
+                                       selection.method = "vst",
+                                       nfeatures = 2000,
+                                       verbose = verbose)
+    
+    # Scale data
+    all_genes <- rownames(seurat_obj)
+    vars_regress <- c("percent.mt", vars_to_regress)
+    seurat_obj <- ScaleData(seurat_obj, 
+                            features = all_genes,
+                            vars.to.regress = vars_regress,
+                            verbose = verbose)
+  }
+  
+  if (verbose) cat("Step 3: Dimensionality reduction\n")
+  
+  # PCA
+  seurat_obj <- RunPCA(seurat_obj, 
+                       features = VariableFeatures(object = seurat_obj),
+                       verbose = verbose)
+  
+  # Apply batch correction method
+  if (verbose) cat(paste("Step 4: Applying", method, "batch correction\n"))
+  
+  if (method == "harmony") {
+    # Harmony integration
+    if (!requireNamespace("harmony", quietly = TRUE)) {
+      stop("harmony package is required for this method. Install with: install.packages('harmony')")
+    }
+    library(harmony)
+    
+    seurat_obj <- RunHarmony(seurat_obj, 
+                             group.by.vars = batch_var,
+                             dims.use = 1:dims,
+                             verbose = verbose)
+    
+    # Use harmony embeddings for downstream analysis
+    seurat_obj <- RunUMAP(seurat_obj, 
+                          reduction = "harmony",
+                          dims = 1:dims,
+                          verbose = verbose)
+    
+    seurat_obj <- FindNeighbors(seurat_obj, 
+                                reduction = "harmony",
+                                dims = 1:dims,
+                                verbose = verbose)
+    
+  } else if (method %in% c("CCA", "RPCA")) {
+    # Integration methods (CCA or RPCA)
+    
+    # Split object by batch
+    obj_list <- SplitObject(seurat_obj, split.by = batch_var)
+    
+    # Find integration anchors
+    if (method == "CCA") {
+      anchors <- FindIntegrationAnchors(object.list = obj_list, 
+                                        dims = 1:dims,
+                                        verbose = verbose)
+    } else if (method == "RPCA") {
+      # Run PCA on each object first
+      obj_list <- lapply(obj_list, function(x) {
+        x <- RunPCA(x, features = VariableFeatures(x), verbose = FALSE)
+        return(x)
+      })
+      
+      anchors <- FindIntegrationAnchors(object.list = obj_list,
+                                        reduction = "rpca",
+                                        dims = 1:dims,
+                                        verbose = verbose)
+    }
+    
+    # Integrate data
+    seurat_obj <- IntegrateData(anchorset = anchors, 
+                                dims = 1:dims,
+                                verbose = verbose)
+    
+    # Set default assay to integrated
+    DefaultAssay(seurat_obj) <- "integrated"
+    
+    # Scale integrated data
+    seurat_obj <- ScaleData(seurat_obj, verbose = verbose)
+    
+    # Run PCA on integrated data
+    seurat_obj <- RunPCA(seurat_obj, verbose = verbose)
+    
+    # UMAP and clustering
+    seurat_obj <- RunUMAP(seurat_obj, 
+                          dims = 1:dims,
+                          verbose = verbose)
+    
+    seurat_obj <- FindNeighbors(seurat_obj, 
+                                dims = 1:dims,
+                                verbose = verbose)
+    
+  } else if (method == "fastMNN") {
+    # fastMNN integration
+    if (!requireNamespace("batchelor", quietly = TRUE)) {
+      stop("batchelor package is required for fastMNN. Install with: BiocManager::install('batchelor')")
+    }
+    
+    # This would require additional setup for fastMNN
+    # Implementation depends on specific requirements
+    stop("fastMNN integration requires additional BioConductor setup. Please use other methods.")
+    
+  }
+  
+  if (verbose) cat("Step 5: Clustering\n")
+  
+  # Find clusters
+  seurat_obj <- FindClusters(seurat_obj, 
+                             resolution = resolution,
+                             verbose = verbose)
+  
+  # Add batch correction method to metadata
+  seurat_obj@meta.data$batch_correction_method <- method
+  
+  if (verbose) {
+    cat("Batch correction completed successfully!\n")
+    cat("Number of cells:", ncol(seurat_obj), "\n")
+    cat("Number of features:", nrow(seurat_obj), "\n")
+    cat("Number of clusters:", length(levels(seurat_obj@meta.data$seurat_clusters)), "\n")
+  }
+  
+  # Return results
+  if (return_uncorrected) {
+    return(list(corrected = seurat_obj, uncorrected = seurat_uncorrected))
+  } else {
+    return(seurat_obj)
+  }
+}
 
+#' Plot Batch Correction Results
+#' 
+#' Generate diagnostic plots to evaluate batch correction effectiveness
+#' 
+#' @param seurat_obj Processed Seurat object
+#' @param batch_var Batch variable used for correction
+#' @param plot_type Type of plot: "umap", "pca", or "both"
+#' 
+#' @return ggplot object or list of ggplot objects
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+plot_batch_correction <- function(seurat_obj, batch_var, plot_type = "both") {
+  
+  library(ggplot2)
+  
+  plots <- list()
+  
+  if (plot_type %in% c("umap", "both")) {
+    # UMAP plot colored by batch
+    p1 <- DimPlot(seurat_obj, 
+                  reduction = "umap", 
+                  group.by = batch_var,
+                  pt.size = 0.5) +
+      ggtitle(paste("UMAP colored by", batch_var))
+    
+    # UMAP plot colored by clusters
+    p2 <- DimPlot(seurat_obj, 
+                  reduction = "umap", 
+                  group.by = "seurat_clusters",
+                  pt.size = 0.5,
+                  label = TRUE) +
+      ggtitle("UMAP colored by clusters")
+    
+    plots$umap_batch <- p1
+    plots$umap_clusters <- p2
+  }
+  
+  if (plot_type %in% c("pca", "both")) {
+    # PCA plot colored by batch
+    p3 <- DimPlot(seurat_obj, 
+                  reduction = "pca", 
+                  group.by = batch_var,
+                  pt.size = 0.5) +
+      ggtitle(paste("PCA colored by", batch_var))
+    
+    plots$pca_batch <- p3
+  }
+  
+  if (plot_type == "both") {
+    return(plots)
+  } else if (plot_type == "umap") {
+    return(list(batch = plots$umap_batch, clusters = plots$umap_clusters))
+  } else {
+    return(plots$pca_batch)
+  }
+}
