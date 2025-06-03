@@ -1,5 +1,5 @@
 ---
-title: "R Utility Functions"
+title: "R Utility Visualization Functions"
 output:
   html_document:
     df_print: paged
@@ -25,6 +25,7 @@ kable(mtcars, caption = "Preview of the dataset")
 ### categorical variables
 
 ```{r}
+library(ggplot2)
 source("../R/ggplot2_utils/colors_utils.R")
 
 # order the categorical variables
@@ -66,6 +67,7 @@ preview_colors(colors)
 
 
 ```{r}
+library(ggplot2)
 source("../R/ggplot2_utils/colors_utils.R")
 
 # order the categorical variables
@@ -96,6 +98,7 @@ ggplot(mtcars, aes(x = mpg, y = wt, color = factor(brand))) +
 ### continous variables
 
 ```{r}
+
 source("../R/ggplot2_utils/colors_utils.R")
 
 show_continuous_palettes("publication")
@@ -107,6 +110,7 @@ preview_continuous_colors(colors, values = seq(-1, 1, length.out = 100),
 
 # boxplot
 ```{r}
+library(ggplot2)
 source('../R/ggplot2_utils/Boxplot.R')
 # order the categorical variables
 mtcars$cyl = factor(mtcars$cyl, levels = c(4,6,8))
@@ -160,6 +164,7 @@ complex_boxplot(data=mtcars,
 # scatterplot
 
 ```{r}
+library(ggplot2)
 source("../R/ggplot2_utils/Scatterplot.R")
 
 simple_scatterplot_categorical(data=mtcars,
@@ -195,6 +200,7 @@ simple_scatterplot_continuous(data=mtcars,
 ### special case for scatterplot -- UMAP
 
 ```{r}
+library(ggplot2)
 source("../R/ggplot2_utils/UMAP_scatterplot.R")
 
 # initiate a toy data
@@ -248,6 +254,7 @@ add_umap_arrows(plot, x_min, x_max, y_min, y_max)
 # barplot
 
 ```{r}
+library(ggplot2)
 source("../R/ggplot2_utils/Ridge_Barplot.R")
 mtcars$cyl = factor(mtcars$cyl, levels = c(4,6,8))
 mtcars$vs = factor(mtcars$vs, levels = c(0,1))
@@ -307,7 +314,7 @@ create_barplot(df_facet_barplot,
 # Ridgeplot
 
 ```{r}
-
+library(ggplot2)
 ## you should have multiple values to plot it for each category
 ## otherwise you get nothing out of it
 source("../R/ggplot2_utils/Ridge_Barplot.R")
@@ -323,5 +330,95 @@ create_faceted_ridgeplot(data = mtcars,
 
 ```
 
+# Heatmap 
+
+```{r}
+library(ggplot2)
+source("../R/pheatmap.R")
+source("../R/ggplot2_utils/colors_utils.R")
+
+# initiate a toy data
+set.seed(123)
+sample_data <- as.data.frame(matrix(rnorm(200), nrow = 20, ncol = 10))
+rownames(sample_data) <- paste("Gene", 1:20, sep = "_")
+colnames(sample_data) <- paste("Sample", 1:10, sep = "_")
+
+# Create sample annotations
+col_annotation <- data.frame(
+  Group = rep(c("Control", "Treatment"), each = 5),
+  Batch = rep(c("A", "B"), times = 5)
+)
+rownames(col_annotation) <- colnames(sample_data)
+
+row_annotation <- data.frame(
+  Category = sample(c("Type1", "Type2", "Type3"), 20, replace = TRUE)
+)
+rownames(row_annotation) <- rownames(sample_data)
+
+# Create custom annotation colors
+Group_colors = get_publication_colors(n = 2,
+                                shuffle = TRUE)
+names(Group_colors) = c("Control", "Treatment")
+
+Batch_colors = get_publication_colors(n = 2,
+                                shuffle = TRUE)
+names(Batch_colors) = c("A", "B")
+
+Category_colors = get_publication_colors(n = 3,
+                                shuffle = TRUE)
+names(Category_colors) = c("Type1", "Type2", "Type3")
+
+
+custom_annotation_colors <- list(
+  Group = Group_colors,
+  Batch = Batch_colors,
+  Category = Category_colors
+)
+
+# Plot basic heatmap
+plot_heatmap(
+  data = sample_data,
+  title = "Basic Heatmap"
+)
+
+# Plot annotated heatmap with scaling and custom colors
+plot_heatmap(
+  data = sample_data,
+  title = "Annotated Heatmap with Custom Colors",
+  scale = "row",
+  annotation_col = col_annotation,
+  annotation_row = row_annotation,
+  annotation_colors = custom_annotation_colors,
+  fontsize = 8
+)
+
+# Plot with custom colors and gaps
+row_idx = rownames(row_annotation[order(row_annotation$Category),,drop=FALSE])
+sample_data = sample_data[match(row_idx, rownames(sample_data)),]
+col_idx = rownames(col_annotation[order(col_annotation$Batch),,drop=FALSE])
+sample_data = sample_data[,match(col_idx, colnames(sample_data))]
+
+row_categories <- calculate_gaps(row_annotation$Category)
+col_categories <- calculate_gaps(col_annotation$Batch)
+
+custom_colors <- get_continuous_colors(method = "publication", palette = "nature_heatmap")
+plot_heatmap(
+  data = sample_data,
+  title = "Custom Colors with Gaps",
+  cluster_rows = FALSE,
+  cluster_cols = FALSE,
+  color_palette = custom_colors,
+  row_gap_categories = row_categories,
+  col_gap_categories = col_categories,
+  annotation_col = col_annotation,
+  annotation_row = row_annotation,
+  annotation_colors = custom_annotation_colors,
+  show_rownames = FALSE
+)
+
+
+
+
+```
 
 
