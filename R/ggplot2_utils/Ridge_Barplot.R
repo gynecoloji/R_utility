@@ -665,17 +665,15 @@ if (FALSE) {
 #' @return A ggplot2 theme object
 #' @export
 barplot_clean_theme <- function() {
-  theme_minimal() +
+  theme_bw() +
     theme(
-      panel.grid.major.x = element_blank(),
+      legend.title = element_blank(),
+      panel.grid.major = element_blank(),
       panel.grid.minor = element_blank(),
-      axis.line.x = element_line(color = "black", size = 0.5),
-      axis.line.y = element_line(color = "black", size = 0.5),
-      text = element_text(size = 12),
-      plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
-      axis.title = element_text(size = 12),
-      axis.text = element_text(size = 10),
-      legend.position = "bottom"
+      panel.border = element_blank(),
+      axis.line = element_line(colour = "black", 
+                               arrow = arrow(length = unit(0.25, "cm"), type = "closed")),
+      text = element_text(size = 20)
     )
 }
 
@@ -806,3 +804,103 @@ create_interactive_barplot <- function(data, x_var, y_var = NULL,
     return(p)
   }
 }
+
+
+#' Calculate Percentage DataFrame
+#'
+#' A simple function to calculate percentages within groups and return a 
+#' summary dataframe with counts, totals, and percentages. Perfect for 
+#' preparing data for percentage stacked bar plots or summary tables.
+#'
+#' @param data A data.frame containing the variables
+#' @param group_var Character string specifying the grouping variable (x-axis)
+#' @param category_var Character string specifying the category variable (fill/stack)
+#' @param weight_var Character string specifying weight variable (optional). 
+#'                   If NULL, counts observations. Default: NULL
+#' @param round_digits Number of decimal places for percentages. Default: 1
+#'
+#' @return A data.frame with columns: group_var, category_var, count, total, percentage
+#'
+#' @examples
+#' # Basic usage with counts
+#' calculate_percentage_df(mtcars, "cyl", "gear")
+#'
+#' # With weight variable  
+#' calculate_percentage_df(sales_data, "region", "product", weight_var = "sales")
+#'
+#' # With custom rounding
+#' calculate_percentage_df(iris, "Species", "Sepal.Length > 5", round_digits = 2)
+#'
+#' @export
+calculate_percentage_df <- function(data, group_var, category_var, 
+                                    weight_var = NULL, round_digits = 1) {
+  
+  require(dplyr)
+  
+  if (is.null(weight_var)) {
+    # Count-based calculation
+    result <- data %>%
+      group_by(.data[[group_var]], .data[[category_var]]) %>%
+      summarise(count = n(), .groups = "drop") %>%
+      group_by(.data[[group_var]]) %>%
+      mutate(
+        total = sum(count),
+        percentage = round(count / total, round_digits)
+      ) %>%
+      ungroup()
+  } else {
+    # Weight-based calculation
+    result <- data %>%
+      group_by(.data[[group_var]], .data[[category_var]]) %>%
+      summarise(count = sum(.data[[weight_var]], na.rm = TRUE), .groups = "drop") %>%
+      group_by(.data[[group_var]]) %>%
+      mutate(
+        total = sum(count),
+        percentage = round(count / totala, round_digits)
+      ) %>%
+      ungroup()
+  }
+  
+  return(result)
+}
+
+#' Quick Percentage Summary
+#'
+#' Even simpler wrapper that just returns the key columns for quick viewing.
+#'
+#' @param data A data.frame containing the variables
+#' @param group_var Character string specifying the grouping variable
+#' @param category_var Character string specifying the category variable
+#'
+#' @return A data.frame with group, category, and percentage columns
+#'
+#' @examples
+#' quick_percentage(mtcars, "cyl", "gear")
+#' quick_percentage(iris, "Species", "Sepal.Length > 5")
+#'
+#' @export
+quick_percentage <- function(data, group_var, category_var) {
+  
+  calculate_percentage_df(data, group_var, category_var) %>%
+    select(all_of(c(group_var, category_var, "percentage")))
+}
+
+# Example usage
+if (FALSE) {
+  # Basic example with mtcars
+  result1 <- calculate_percentage_df(mtcars, "cyl", "gear")
+  print(result1)
+  
+  # Quick summary
+  result2 <- quick_percentage(mtcars, "cyl", "gear")
+  print(result2)
+  
+  # With iris data
+  result3 <- calculate_percentage_df(iris, "Species", "Sepal.Length > 5")
+  print(result3)
+}
+
+
+
+
+

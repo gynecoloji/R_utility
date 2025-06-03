@@ -249,12 +249,79 @@ add_umap_arrows(plot, x_min, x_max, y_min, y_max)
 
 ```{r}
 source("../R/ggplot2_utils/Ridge_Barplot.R")
-create_barplot(mtcars, x_var = "cyl", title = "Count by Cylinder", reorder_bars = TRUE)
+mtcars$cyl = factor(mtcars$cyl, levels = c(4,6,8))
+mtcars$vs = factor(mtcars$vs, levels = c(0,1))
+mtcars$gear = factor(mtcars$gear, levels = c(3,4,5))
 
+create_barplot(mtcars, 
+               x_var = "cyl", 
+               y_var = NULL,
+               fill_var = "vs", 
+               reorder_bars = FALSE,
+               stat_type = "count",
+               custom_theme = barplot_clean_theme())
+
+create_barplot(mtcars, 
+               x_var = "cyl", 
+               y_var = NULL,
+               fill_var = "gear", 
+               reorder_bars = FALSE,
+               stat_type = "count",
+               custom_theme = barplot_clean_theme(),
+               facet_var = 'vs')
+
+
+result2 <- quick_percentage(mtcars, "cyl", "gear")
+print(result2)
+
+create_barplot(result2, 
+               x_var = "cyl", 
+               y_var = "percentage",
+               fill_var = "gear", 
+               reorder_bars = FALSE,
+               custom_theme = barplot_clean_theme(),
+               stat_type = "prop")
+
+df_facet_barplot = data.frame(cyl=factor(),
+                              gear = factor(),
+                              percentage = numeric(),
+                              vs = factor())
+for (i in levels(mtcars[["vs"]])) {
+  tmp = mtcars[mtcars[["vs"]] == i,]
+  tmp = quick_percentage(tmp, "cyl", "gear")
+  tmp["vs"] = i
+  df_facet_barplot = rbind(df_facet_barplot, tmp)
+}
+create_barplot(df_facet_barplot, 
+               x_var = "cyl", 
+               y_var = "percentage",
+               fill_var = "gear", 
+               reorder_bars = FALSE,
+               custom_theme = barplot_clean_theme(),
+               stat_type = "prop",
+               facet_var = "vs")
 
 
 ```
 
+# Ridgeplot
+
+```{r}
+
+## you should have multiple values to plot it for each category
+## otherwise you get nothing out of it
+source("../R/ggplot2_utils/Ridge_Barplot.R")
+mtcars$cyl = factor(mtcars$cyl, levels = c(4,6,8))
+mtcars$vs = factor(mtcars$vs, levels = c(0,1))
+mtcars$gear = factor(mtcars$gear, levels = c(3,4,5))
+
+create_faceted_ridgeplot(data = mtcars,
+                         x_var = "wt",
+                         y_var = "cyl",
+                         group_var = "vs")+
+  ridgeplot_clean_theme()
+
+```
 
 
 
