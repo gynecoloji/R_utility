@@ -1,10 +1,10 @@
 # R Utility Functions Repository
 
-A comprehensive collection of R utility functions for genomics data analysis, visualization, and statistical computing.
+A comprehensive collection of R utility functions for biolkogy data analysis, visualization, and statistical computing.(Especially for sequencing data analysis)
 
 ## Overview
 
-This repository provides a curated set of R functions designed to streamline common workflows in computational biology and data science. The utilities cover the full spectrum from basic data visualization to advanced genomics analyses, making it easier to perform reproducible research. It is mostly used for my own research purpose. I would be very happy if others find it also useful for their research.
+This repository provides a curated set of R functions (summarizing the functions created by me from 2020) designed to streamline common workflows in computational biology and data science. The utilities cover the full spectrum from basic data visualization to advanced genomics analyses, making it easier to perform reproducible research. It is mostly used for my own research purpose. I would be very happy if others find it also useful for their research.
 
 ## Features
 
@@ -13,8 +13,8 @@ This repository provides a curated set of R functions designed to streamline com
 - Publication-ready plotting functions
 - Add important stat-related information to plots
 - Custom ggplot2 themes and color palettes
+- Integrate pheatmap package for better visualization
 - Multi-panel figure generation
-- Heatmap and clustering visualizations
 
 ### 🧬 Single Cell Data Analysis
 
@@ -131,9 +131,9 @@ If you use these utility functions in your research, please cite:
 
 ```
 @software{r_utility_functions,
-  author = {Your Name},
-  title = {R Utility Functions for Genomics Data Analysis},
-  url = {https://github.com/yourusername/r-utils-repo},
+  author = {Ji Wang},
+  title = {R Utility Functions for Biology Data Analysis},
+  url = {https://github.com/gynecoloji/R_utility},
   year = {2025}
 }
 ```
@@ -144,11 +144,14 @@ If you use these utility functions in your research, please cite:
 
 ## Acknowledgments
 
+- The R Core Team for developing R
 - The Bioconductor community for excellent genomics packages
+- Hadley Wickham and the tidyverse team for data manipulation and visualization tools
+- Pheatmap developers for enhanced heatmap visualizations
 - Seurat team for single cell analysis tools
 - DESeq2 and edgeR developers for RNA-seq analysis methods
 - The broader R community for statistical computing tools
-
+- All contributors who have helped improve this repository
 ---
 
 **Note**: This repository is actively maintained. Please check for updates regularly and report any issues you encounter.
