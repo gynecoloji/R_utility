@@ -833,7 +833,7 @@ create_interactive_barplot <- function(data, x_var, y_var = NULL,
 #'
 #' @export
 calculate_percentage_df <- function(data, group_var, category_var, 
-                                    weight_var = NULL, round_digits = 1) {
+                                    weight_var = NULL, round_digits = 4) {
   
   require(dplyr)
   

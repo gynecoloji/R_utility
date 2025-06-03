@@ -209,26 +209,17 @@ umap_theme_without_texts <- function() {
 #' @import ggplot2 grid
 #' @author Your Name
 #' @export
-add_umap_arrows <- function(plot, x_min, x_max, y_min, y_max) {
-  x_arrow <- annotation_custom(
-    grob = linesGrob(
-      x = unit(c(0, 1), "cm"),
-      y = unit(c(0, 0), "cm"),
-      arrow = arrow(length = unit(0.25, "cm"), type = "closed"),
-      gp = gpar(col = "black", lwd = 2, fill="black")
-    ),
-    xmin = x_min, xmax = x_max, ymin = y_min, ymax = y_max
-  )
-  
-  y_arrow <- annotation_custom(
-    grob = linesGrob(
-      x = unit(c(0, 0), "cm"),
-      y = unit(c(0, 1), "cm"),
-      arrow = arrow(length = unit(0.25, "cm"), type = "closed"),
-      gp = gpar(col = "black", lwd = 2, fill="black")
-    ),
-    xmin = x_min, xmax = x_max, ymin = y_min, ymax = y_max
-  )
-  # Add arrows to plot
-  plot + x_arrow + y_arrow + coord_fixed()
+add_umap_arrows <- function(plot, x_start, y_start, x_length = 2, y_length = 2) {
+  plot +
+    annotate("segment",
+             x = x_start, xend = x_start + x_length,
+             y = y_start, yend = y_start,
+             arrow = arrow(length = unit(0.25, "cm"), type = "closed"),
+             linewidth = 1.2, color = "black") +
+    annotate("segment",
+             x = x_start, xend = x_start,
+             y = y_start, yend = y_start + y_length,
+             arrow = arrow(length = unit(0.25, "cm"), type = "closed"),
+             linewidth = 1.2, color = "black") +
+    coord_fixed()
 }

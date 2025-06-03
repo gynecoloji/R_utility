@@ -246,7 +246,7 @@ plot = ggplot(data = df,
                                oob = function(x, ...){scales::squish(x, c(lower,upper))})+
   umap_theme_without_texts()
 
-add_umap_arrows(plot, x_min, x_max, y_min, y_max)
+add_umap_arrows(plot, x_min, y_min)
 
 ```
 
@@ -420,5 +420,19 @@ plot_heatmap(
 
 
 ```
+
+#
+
+
+
+
+
+
+
+
+
+
+
+
 
 
