@@ -9,9 +9,10 @@ This repository provides a curated set of R functions designed to streamline com
 ## Features
 
 ### 📊 Data Visualization
+- Mainly focusing on basic graphs (scatterplot, boxplot, barplot and ridgeplot)
 - Publication-ready plotting functions
+- Add important stat-related information to plots
 - Custom ggplot2 themes and color palettes
-- Interactive visualization utilities
 - Multi-panel figure generation
 - Heatmap and clustering visualizations
 
